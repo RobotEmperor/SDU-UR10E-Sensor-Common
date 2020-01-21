@@ -196,6 +196,7 @@ void PoseEstimation::initialize()
   inertia_of_tool.resize(3,3);
   contacted_force_torque.resize(6,1);
 
+  //////////////////////////////////
   tool_pose_data.fill(0);
   tool_vel_data.fill(0);
   tool_acc_data.fill(0);
@@ -208,13 +209,14 @@ void PoseEstimation::initialize()
 
   inertia_of_tool.fill(0);
   contacted_force_torque.fill(0);
+  //////////////////////////////////
 
-  kalman_filter_linear_acc = new KalmanFilter;
+  kalman_filter_linear_acc = new KalmanFilter; // for linear acc sensor
 
-  filtered_data.resize(6, 1);
+  filtered_data.resize(6,1);
   filtered_data.fill(0);
 
-  offset_data.resize(6, 1);
+  offset_data.resize(6,1);
   offset_data.fill(0);
 
   kalman_filter_linear_acc->initialize(filtered_data,filtered_data);
@@ -224,8 +226,6 @@ void PoseEstimation::initialize()
   kalman_filter_linear_acc->R.setIdentity();
 
   kalman_filter_linear_acc->R = kalman_filter_linear_acc->R*2000; // sensor noise filtering  --> can be modified a external file.
-
-  //ur10e_kinematics = new Kinematics;
 }
 
 void PoseEstimation::offset_init(Eigen::MatrixXd data, bool time_check)
@@ -257,6 +257,7 @@ void PoseEstimation::estimation_processing(Eigen::MatrixXd data) // input entire
   contacted_force_torque(0,0) = data(0,0) -(mass_of_tool * filtered_data(0,0))*-1;
   contacted_force_torque(1,0) = data(1,0) -(mass_of_tool * filtered_data(1,0))*-1;
   contacted_force_torque(2,0) = data(2,0) -(mass_of_tool * filtered_data(2,0))*-1;
+
   //calculate inertia of tool
   //inertia_of_tool(0,0) = data(3,0)/tool_acc_data(3,0);
   //inertia_of_tool(1,1) = data(4,0)/tool_acc_data(4,0);
