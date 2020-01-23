@@ -10,7 +10,6 @@
 
 Ur10eFTsensor::Ur10eFTsensor()
 {
-
   low_pass_filter_fx= new LowPassFilter;
   low_pass_filter_fy= new LowPassFilter;
   low_pass_filter_fz= new LowPassFilter;
@@ -38,6 +37,7 @@ Ur10eFTsensor::Ur10eFTsensor()
   kalman_filter_force_torque = new KalmanFilter;
 
   kalman_bucy_filter_force_torque = new KalmanBucyFilter;
+  initialize();
 
 }
 
@@ -51,6 +51,43 @@ Ur10eFTsensor::~Ur10eFTsensor()
   delete low_pass_filter_tz; delete high_pass_filter_tz;
 
   delete kalman_filter_force_torque;
+}
+void Ur10eFTsensor::parse_init_data(const std::string &path)
+{
+  YAML::Node doc; // YAML file class 선언!
+
+  std::cout << control_time << "\n\n";
+
+    try
+    {
+      // load yaml
+      doc = YAML::LoadFile(path.c_str()); // 파일 경로를 입력하여 파일을 로드 한다.
+
+    }catch(const std::exception& e) // 에러 점검
+    {
+      printf("Fail to load yaml file!");
+      return;
+    }
+    control_time = doc["control_time"].as<double>();
+    lpf_force_cutoff_frequency = doc["lpf_force_cutoff_frequency"].as<double>();
+    lpf_torque_cutoff_frequency = doc["lpf_torque_cutoff_frequency"].as<double>();
+
+    hpf_force_cutoff_frequency = doc["hpf_force_cutoff_frequency"].as<double>();
+    hpf_torque_cutoff_frequency = doc["hpf_torque_cutoff_frequency"].as<double>();
+
+    kalman_filter_force_torque->Q = kalman_filter_force_torque->Q*doc["gain_Q"].as<double>();
+    kalman_filter_force_torque->R = kalman_filter_force_torque->R*doc["gain_R"].as<double>();
+
+
+//    std::cout << control_time << "\n\n";
+//    std::cout << lpf_force_cutoff_frequency << "\n\n";
+//    std::cout << lpf_torque_cutoff_frequency << "\n\n";
+//
+//    std::cout << hpf_force_cutoff_frequency << "\n\n";
+//    std::cout << hpf_torque_cutoff_frequency << "\n\n";
+//
+//    std::cout << kalman_filter_force_torque->Q << "\n\n";
+//    std::cout << kalman_filter_force_torque->R << "\n\n";
 }
 void Ur10eFTsensor::initialize()
 {
@@ -110,7 +147,7 @@ void Ur10eFTsensor::initialize()
   kalman_filter_force_torque->Q.setIdentity();
   kalman_filter_force_torque->R.setIdentity();
 
-  kalman_filter_force_torque->R = kalman_filter_force_torque->R*500; // sensor noise filtering  --> can be modified a external file.
+  //kalman_filter_force_torque->R = kalman_filter_force_torque->R*500; // sensor noise filtering  --> can be modified a external file.
 
   kalman_bucy_filter_force_torque->initialize(ft_filtered_data,ft_filtered_data);
   kalman_bucy_filter_force_torque->F.setIdentity();
@@ -118,7 +155,7 @@ void Ur10eFTsensor::initialize()
   kalman_bucy_filter_force_torque->Q.setIdentity();
   kalman_bucy_filter_force_torque->R.setIdentity();
 
-  kalman_bucy_filter_force_torque->R = kalman_bucy_filter_force_torque->R*0.003; // sensor noise filtering  --> can be modified a external file.
+  //kalman_bucy_filter_force_torque->R = kalman_bucy_filter_force_torque->R*0.003; // sensor noise filtering  --> can be modified a external file.
 
   kalman_bucy_filter_force_torque->control_time = control_time;
 
@@ -165,6 +202,40 @@ void Ur10eFTsensor::signal_processing(Eigen::MatrixXd data)
   //ft_filtered_data(3,0) = high_pass_filter_tx->hpf_processing(data(3,0));
   //ft_filtered_data(4,0) = high_pass_filter_ty->hpf_processing(data(4,0));
   //ft_filtered_data(5,0) = high_pass_filter_tz->hpf_processing(data(5,0));
+}
+
+// collision detection
+CollisionDetection::CollisionDetection()
+{
+  //initialize
+  control_time = 0;
+
+  fx_detection = 0; fx_k = 0; fx_high_limit = 0; fx_low_limit = 0;
+  fy_detection = 0; fy_k = 0; fy_high_limit = 0; fy_low_limit = 0;
+  fz_detection = 0; fz_k = 0; fz_high_limit = 0; fz_low_limit = 0;
+  tx_detection = 0; tx_k = 0; tx_high_limit = 0; tx_low_limit = 0;
+  ty_detection = 0; ty_k = 0; ty_high_limit = 0; ty_low_limit = 0;
+  tz_detection = 0; tz_k = 0; tz_high_limit = 0; tz_low_limit = 0;
+}
+
+CollisionDetection::~CollisionDetection()
+{
+
+}
+
+void CollisionDetection::initialize()
+{
+
+}
+
+void CollisionDetection::collision_detection_processing(Eigen::MatrixXd data)
+{
+  fx_detection = calculate_cusum(data(0,0),fx_k,fx_high_limit,fx_low_limit); // how to decide k, limit
+  fy_detection = calculate_cusum(data(1,0),fy_k,fy_high_limit,fy_low_limit);
+  fz_detection = calculate_cusum(data(2,0),fz_k,fz_high_limit,fz_low_limit);
+  tx_detection = calculate_cusum(data(3,0),tx_k,tx_high_limit,tx_low_limit);
+  ty_detection = calculate_cusum(data(4,0),ty_k,ty_high_limit,ty_low_limit);
+  tz_detection = calculate_cusum(data(5,0),tz_k,tz_high_limit,tz_low_limit);
 }
 
 // pose estimation
@@ -267,40 +338,5 @@ void PoseEstimation::estimation_processing(Eigen::MatrixXd data) // input entire
   //contacted_torque(0,0) = data(3,0) - inertia_of_tool(0,0)*tool_acc_data(3,0);
   //contacted_torque(1,0) = data(4,0) - inertia_of_tool(0,0)*tool_acc_data(4,0);
   //contacted_torque(2,0) = data(5,0) - inertia_of_tool(0,0)*tool_acc_data(5,0);
-}
-
-
-// pose estimation
-CollisionDetection::CollisionDetection()
-{
-  //initialize
-  control_time = 0;
-
-  fx_detection = 0; fx_k = 0; fx_high_limit = 0; fx_low_limit = 0;
-  fy_detection = 0; fy_k = 0; fy_high_limit = 0; fy_low_limit = 0;
-  fz_detection = 0; fz_k = 0; fz_high_limit = 0; fz_low_limit = 0;
-  tx_detection = 0; tx_k = 0; tx_high_limit = 0; tx_low_limit = 0;
-  ty_detection = 0; ty_k = 0; ty_high_limit = 0; ty_low_limit = 0;
-  tz_detection = 0; tz_k = 0; tz_high_limit = 0; tz_low_limit = 0;
-}
-
-CollisionDetection::~CollisionDetection()
-{
-
-}
-
-void CollisionDetection::initialize()
-{
-
-}
-
-void CollisionDetection::collision_detection_processing(Eigen::MatrixXd data)
-{
-  fx_detection = calculate_cusum(data(0,0),fx_k,fx_high_limit,fx_low_limit); // how to decide k, limit
-  fy_detection = calculate_cusum(data(1,0),fy_k,fy_high_limit,fy_low_limit);
-  fz_detection = calculate_cusum(data(2,0),fz_k,fz_high_limit,fz_low_limit);
-  tx_detection = calculate_cusum(data(3,0),tx_k,tx_high_limit,tx_low_limit);
-  ty_detection = calculate_cusum(data(4,0),ty_k,ty_high_limit,ty_low_limit);
-  tz_detection = calculate_cusum(data(5,0),tz_k,tz_high_limit,tz_low_limit);
 }
 

@@ -15,18 +15,9 @@
 #include "sdu_math/kinematics.h"
 #include "sdu_math/statics_math.h"
 #include <Eigen/Dense>
-
-/*
-#include <std_msgs/Int16.h>
-#include <std_msgs/Float64.h>
-#include <std_msgs/String.h>
-#include <geometry_msgs/Pose.h>
-#include <boost/thread.hpp>
-
-#include <Eigen/Dense>
 #include <yaml-cpp/yaml.h>
-#include <fstream>
- */
+
+
 
 class Ur10eFTsensor
 {
@@ -36,6 +27,7 @@ class Ur10eFTsensor
     void initialize();
     void offset_init(Eigen::MatrixXd data, bool time_check);
     void signal_processing(Eigen::MatrixXd data); // 6*1 data fx fy fz tx ty tz
+    void parse_init_data(const std::string &path);
 
     //initialize
     double control_time;

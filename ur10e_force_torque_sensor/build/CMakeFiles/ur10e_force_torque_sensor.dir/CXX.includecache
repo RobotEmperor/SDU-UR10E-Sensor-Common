@@ -1,0 +1,12 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/yik/sdu_ws/SDU-UR10E-Sensor-Common/ur10e_force_torque_sensor/src/ur10e_force_torque_sensor.cpp
+ur10e_force_torque_sensor/ur10e_force_torque_sensor.h
+/home/yik/sdu_ws/SDU-UR10E-Sensor-Common/ur10e_force_torque_sensor/src/ur10e_force_torque_sensor/ur10e_force_torque_sensor.h
+

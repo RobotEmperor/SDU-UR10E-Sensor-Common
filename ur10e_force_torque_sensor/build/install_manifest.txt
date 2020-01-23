@@ -1,0 +1,2 @@
+/usr/local/lib/libur10e_force_torque_sensor.so
+/usr/local/include/ur10e_force_torque_sensor/ur10e_force_torque_sensor.h
