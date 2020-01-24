@@ -6,19 +6,12 @@ SET ( PROJECT_VERSION_MINOR 1 )
 
 SET ( CMAKE_C_COMPILER "gcc" )
  
-INCLUDE_DIRECTORIES (${PROJECT_NAME}/include)
+INCLUDE_DIRECTORIES (${CMAKE_SOURCE_DIR}/include)
 
 add_compile_options(-std=c++11)
  
 find_package(Eigen3 REQUIRED)
 INCLUDE_DIRECTORIES (${EIGEN3_INCLUDE_DIR})
-
-
-set(LIB_HEADER_FILES
-        include/sensor_filter/sensor_filter.h
-)
-
-INCLUDE_DIRECTORIES (include)
 
 
 set( sensor_filter_SOURCE_FILES 

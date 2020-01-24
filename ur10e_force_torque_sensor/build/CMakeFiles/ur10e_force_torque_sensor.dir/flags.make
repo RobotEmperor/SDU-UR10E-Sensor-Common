@@ -6,5 +6,5 @@ CXX_FLAGS = -fPIC   -std=c++11
 
 CXX_DEFINES = -Dur10e_force_torque_sensor_EXPORTS
 
-CXX_INCLUDES = -I/home/yik/sdu_ws/SDU-UR10E-Sensor-Common/ur10e_force_torque_sensor/ur10e_force_torque_sensor/include -I/usr/include/eigen3 
+CXX_INCLUDES = -I/home/yik/sdu_ws/SDU-UR10E-Sensor-Common/ur10e_force_torque_sensor/include -I/usr/include/eigen3 
 

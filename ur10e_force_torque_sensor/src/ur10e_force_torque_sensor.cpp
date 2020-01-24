@@ -55,39 +55,46 @@ Ur10eFTsensor::~Ur10eFTsensor()
 void Ur10eFTsensor::parse_init_data(const std::string &path)
 {
   YAML::Node doc; // YAML file class 선언!
+  try
+  {
+    // load yaml
+    doc = YAML::LoadFile(path.c_str()); // 파일 경로를 입력하여 파일을 로드 한다.
 
-  std::cout << control_time << "\n\n";
+  }catch(const std::exception& e) // 에러 점검
+  {
+    printf("Fail to load yaml file!");
+    return;
+  }
+  control_time = doc["control_time"].as<double>();
+  lpf_force_cutoff_frequency = doc["lpf_force_cutoff_frequency"].as<double>();
+  lpf_torque_cutoff_frequency = doc["lpf_torque_cutoff_frequency"].as<double>();
 
-    try
-    {
-      // load yaml
-      doc = YAML::LoadFile(path.c_str()); // 파일 경로를 입력하여 파일을 로드 한다.
+  hpf_force_cutoff_frequency = doc["hpf_force_cutoff_frequency"].as<double>();
+  hpf_torque_cutoff_frequency = doc["hpf_torque_cutoff_frequency"].as<double>();
 
-    }catch(const std::exception& e) // 에러 점검
-    {
-      printf("Fail to load yaml file!");
-      return;
-    }
-    control_time = doc["control_time"].as<double>();
-    lpf_force_cutoff_frequency = doc["lpf_force_cutoff_frequency"].as<double>();
-    lpf_torque_cutoff_frequency = doc["lpf_torque_cutoff_frequency"].as<double>();
+  kalman_filter_force_torque->Q = kalman_filter_force_torque->Q*doc["gain_Q"].as<double>();
+  kalman_filter_force_torque->R = kalman_filter_force_torque->R*doc["gain_R"].as<double>();
 
-    hpf_force_cutoff_frequency = doc["hpf_force_cutoff_frequency"].as<double>();
-    hpf_torque_cutoff_frequency = doc["hpf_torque_cutoff_frequency"].as<double>();
+  fx_k = doc["fx_k"].as<double>();
+  fy_k = doc["fy_k"].as<double>();
+  fz_k = doc["fz_k"].as<double>();
+  tx_k = doc["tx_k"].as<double>();
+  ty_k = doc["ty_k"].as<double>();
+  tz_k = doc["tz_k"].as<double>();
 
-    kalman_filter_force_torque->Q = kalman_filter_force_torque->Q*doc["gain_Q"].as<double>();
-    kalman_filter_force_torque->R = kalman_filter_force_torque->R*doc["gain_R"].as<double>();
+  fx_high_limit = doc["fx_high_limit"].as<double>();
+  fy_high_limit = doc["fy_high_limit"].as<double>();
+  fz_high_limit = doc["fz_high_limit"].as<double>();
+  tx_high_limit = doc["tx_high_limit"].as<double>();
+  ty_high_limit = doc["ty_high_limit"].as<double>();
+  tz_high_limit = doc["tz_high_limit"].as<double>();
 
-
-//    std::cout << control_time << "\n\n";
-//    std::cout << lpf_force_cutoff_frequency << "\n\n";
-//    std::cout << lpf_torque_cutoff_frequency << "\n\n";
-//
-//    std::cout << hpf_force_cutoff_frequency << "\n\n";
-//    std::cout << hpf_torque_cutoff_frequency << "\n\n";
-//
-//    std::cout << kalman_filter_force_torque->Q << "\n\n";
-//    std::cout << kalman_filter_force_torque->R << "\n\n";
+  fx_low_limit = doc["fx_low_limit"].as<double>();
+  fy_low_limit = doc["fy_low_limit"].as<double>();
+  fz_low_limit = doc["fz_low_limit"].as<double>();
+  tx_low_limit = doc["tx_low_limit"].as<double>();
+  ty_low_limit = doc["ty_low_limit"].as<double>();
+  tz_low_limit = doc["tz_low_limit"].as<double>();
 }
 void Ur10eFTsensor::initialize()
 {
@@ -159,6 +166,13 @@ void Ur10eFTsensor::initialize()
 
   kalman_bucy_filter_force_torque->control_time = control_time;
 
+  fx_detection = 0; fx_k = 0; fx_high_limit = 0; fx_low_limit = 0;
+  fy_detection = 0; fy_k = 0; fy_high_limit = 0; fy_low_limit = 0;
+  fz_detection = 0; fz_k = 0; fz_high_limit = 0; fz_low_limit = 0;
+  tx_detection = 0; tx_k = 0; tx_high_limit = 0; tx_low_limit = 0;
+  ty_detection = 0; ty_k = 0; ty_high_limit = 0; ty_low_limit = 0;
+  tz_detection = 0; tz_k = 0; tz_high_limit = 0; tz_low_limit = 0;
+
 }
 void Ur10eFTsensor::offset_init(Eigen::MatrixXd data, bool time_check)
 {
@@ -205,30 +219,7 @@ void Ur10eFTsensor::signal_processing(Eigen::MatrixXd data)
 }
 
 // collision detection
-CollisionDetection::CollisionDetection()
-{
-  //initialize
-  control_time = 0;
-
-  fx_detection = 0; fx_k = 0; fx_high_limit = 0; fx_low_limit = 0;
-  fy_detection = 0; fy_k = 0; fy_high_limit = 0; fy_low_limit = 0;
-  fz_detection = 0; fz_k = 0; fz_high_limit = 0; fz_low_limit = 0;
-  tx_detection = 0; tx_k = 0; tx_high_limit = 0; tx_low_limit = 0;
-  ty_detection = 0; ty_k = 0; ty_high_limit = 0; ty_low_limit = 0;
-  tz_detection = 0; tz_k = 0; tz_high_limit = 0; tz_low_limit = 0;
-}
-
-CollisionDetection::~CollisionDetection()
-{
-
-}
-
-void CollisionDetection::initialize()
-{
-
-}
-
-void CollisionDetection::collision_detection_processing(Eigen::MatrixXd data)
+void Ur10eFTsensor::collision_detection_processing(Eigen::MatrixXd data)
 {
   fx_detection = calculate_cusum(data(0,0),fx_k,fx_high_limit,fx_low_limit); // how to decide k, limit
   fy_detection = calculate_cusum(data(1,0),fy_k,fy_high_limit,fy_low_limit);

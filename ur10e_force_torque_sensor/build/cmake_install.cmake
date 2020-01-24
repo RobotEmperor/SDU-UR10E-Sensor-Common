@@ -57,10 +57,6 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   endif()
 endif()
 
-if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xur10e_force_torque_sensorx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/include/ur10e_force_torque_sensor" TYPE FILE FILES "/home/yik/sdu_ws/SDU-UR10E-Sensor-Common/ur10e_force_torque_sensor/include/ur10e_force_torque_sensor/ur10e_force_torque_sensor.h")
-endif()
-
 if(CMAKE_INSTALL_COMPONENT)
   set(CMAKE_INSTALL_MANIFEST "install_manifest_${CMAKE_INSTALL_COMPONENT}.txt")
 else()

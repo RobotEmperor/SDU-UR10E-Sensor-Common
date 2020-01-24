@@ -6,7 +6,7 @@ SET ( PROJECT_VERSION_MINOR 1 )
 
 SET ( CMAKE_C_COMPILER "gcc" )
  
-INCLUDE_DIRECTORIES (${PROJECT_NAME}/include)
+INCLUDE_DIRECTORIES (${CMAKE_SOURCE_DIR}/include)
 
 add_compile_options(-std=c++11)
  
@@ -18,9 +18,9 @@ find_package(PkgConfig)
 pkg_check_modules(yaml_cpp yaml-cpp REQUIRED)
 
 
-set(LIB_HEADER_FILES
-        include/ur10e_force_torque_sensor/ur10e_force_torque_sensor.h
-)
+#set(LIB_HEADER_FILES
+#        include/ur10e_force_torque_sensor/ur10e_force_torque_sensor.h
+#)
 
 INCLUDE_DIRECTORIES (${yaml_cpp_INCLUDE_DIRS})
 
@@ -28,7 +28,7 @@ set( ur10e_force_torque_sensor_SOURCE_FILES
   src/ur10e_force_torque_sensor.cpp
 )
 link_directories(/usr/local/lib)
-add_library(ur10e_force_torque_sensor SHARED ${ur10e_force_torque_sensor_SOURCE_FILES}  ${LIB_HEADER_FILES})
+add_library(ur10e_force_torque_sensor SHARED ${ur10e_force_torque_sensor_SOURCE_FILES})
 target_link_libraries(ur10e_force_torque_sensor sdu_math sensor_filter ${yaml_cpp_LIBRARIES})
 
 

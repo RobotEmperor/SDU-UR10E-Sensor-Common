@@ -29,6 +29,8 @@ class Ur10eFTsensor
     void signal_processing(Eigen::MatrixXd data); // 6*1 data fx fy fz tx ty tz
     void parse_init_data(const std::string &path);
 
+    void collision_detection_processing(Eigen::MatrixXd data); // 6*1 data fx fy fz tx ty tz
+
     //initialize
     double control_time;
     double lpf_force_cutoff_frequency;
@@ -36,6 +38,15 @@ class Ur10eFTsensor
 
     double hpf_force_cutoff_frequency;
     double hpf_torque_cutoff_frequency;
+
+    double fx_detection, fx_k, fx_high_limit, fx_low_limit;
+    double fy_detection, fy_k, fy_high_limit, fy_low_limit;
+    double fz_detection, fz_k, fz_high_limit, fz_low_limit;
+    double tx_detection, tx_k, tx_high_limit, tx_low_limit;
+    double ty_detection, ty_k, ty_high_limit, ty_low_limit;
+    double tz_detection, tz_k, tz_high_limit, tz_low_limit;
+
+
     double ft_raw_data;
 
     //filter will be added
@@ -101,28 +112,6 @@ class PoseEstimation
   private:
 };
 
-class CollisionDetection
-{
-  public:
-    CollisionDetection();
-    ~CollisionDetection();
-    void initialize();
-    void collision_detection_processing(Eigen::MatrixXd data); // 6*1 data fx fy fz tx ty tz
-
-    double fx_detection, fx_k, fx_high_limit, fx_low_limit;
-    double fy_detection, fy_k, fy_high_limit, fy_low_limit;
-    double fz_detection, fz_k, fz_high_limit, fz_low_limit;
-    double tx_detection, tx_k, tx_high_limit, tx_low_limit;
-    double ty_detection, ty_k, ty_high_limit, ty_low_limit;
-    double tz_detection, tz_k, tz_high_limit, tz_low_limit;
-
-  private:
-
-    //void offset_init(Eigen::MatrixXd data, bool time_check);
-
-    //initialize
-    double control_time;
-};
 
 
 #endif /* SDU_UR10E_SENSOR_UR10E_FORCE_TORQUE_SENSOR_INCLUDE_UR10E_FORCE_TORQUE_SENSOR_UR10E_FORCE_TORQUE_SENSOR_H_ */
