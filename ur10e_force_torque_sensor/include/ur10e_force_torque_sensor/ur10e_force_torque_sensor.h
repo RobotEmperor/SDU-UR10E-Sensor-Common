@@ -13,7 +13,7 @@
 
 #include "sensor_filter/sensor_filter.h"
 #include "sdu_math/kinematics.h"
-#include "sdu_math/statics_math.h"
+#include "sdu_math/statistics_math.h"
 #include <Eigen/Dense>
 #include <yaml-cpp/yaml.h>
 
@@ -68,6 +68,9 @@ class Ur10eFTsensor
 
     KalmanFilter  *kalman_filter_force_torque;
     KalmanBucyFilter  *kalman_bucy_filter_force_torque;
+
+    double gain_q;
+    double gain_r;
 
 
     Eigen::MatrixXd ft_filtered_data;

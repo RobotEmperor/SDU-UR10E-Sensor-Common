@@ -37,6 +37,17 @@ Ur10eFTsensor::Ur10eFTsensor()
   kalman_filter_force_torque = new KalmanFilter;
 
   kalman_bucy_filter_force_torque = new KalmanBucyFilter;
+
+  gain_q = 0;
+  gain_r = 0;
+
+  fx_detection = 0; fx_k = 0; fx_high_limit = 0; fx_low_limit = 0;
+  fy_detection = 0; fy_k = 0; fy_high_limit = 0; fy_low_limit = 0;
+  fz_detection = 0; fz_k = 0; fz_high_limit = 0; fz_low_limit = 0;
+  tx_detection = 0; tx_k = 0; tx_high_limit = 0; tx_low_limit = 0;
+  ty_detection = 0; ty_k = 0; ty_high_limit = 0; ty_low_limit = 0;
+  tz_detection = 0; tz_k = 0; tz_high_limit = 0; tz_low_limit = 0;
+
   initialize();
 
 }
@@ -72,8 +83,8 @@ void Ur10eFTsensor::parse_init_data(const std::string &path)
   hpf_force_cutoff_frequency = doc["hpf_force_cutoff_frequency"].as<double>();
   hpf_torque_cutoff_frequency = doc["hpf_torque_cutoff_frequency"].as<double>();
 
-  kalman_filter_force_torque->Q = kalman_filter_force_torque->Q*doc["gain_Q"].as<double>();
-  kalman_filter_force_torque->R = kalman_filter_force_torque->R*doc["gain_R"].as<double>();
+  gain_q = doc["gain_Q"].as<double>();
+  gain_r = doc["gain_R"].as<double>();
 
   fx_k = doc["fx_k"].as<double>();
   fy_k = doc["fy_k"].as<double>();
@@ -154,7 +165,8 @@ void Ur10eFTsensor::initialize()
   kalman_filter_force_torque->Q.setIdentity();
   kalman_filter_force_torque->R.setIdentity();
 
-  //kalman_filter_force_torque->R = kalman_filter_force_torque->R*500; // sensor noise filtering  --> can be modified a external file.
+  kalman_filter_force_torque->Q = kalman_filter_force_torque->Q*gain_q; // sensor noise filtering  --> can be modified a external file.
+  kalman_filter_force_torque->R = kalman_filter_force_torque->R*gain_r; // sensor noise filtering  --> can be modified a external file.
 
   kalman_bucy_filter_force_torque->initialize(ft_filtered_data,ft_filtered_data);
   kalman_bucy_filter_force_torque->F.setIdentity();
@@ -165,13 +177,6 @@ void Ur10eFTsensor::initialize()
   //kalman_bucy_filter_force_torque->R = kalman_bucy_filter_force_torque->R*0.003; // sensor noise filtering  --> can be modified a external file.
 
   kalman_bucy_filter_force_torque->control_time = control_time;
-
-  fx_detection = 0; fx_k = 0; fx_high_limit = 0; fx_low_limit = 0;
-  fy_detection = 0; fy_k = 0; fy_high_limit = 0; fy_low_limit = 0;
-  fz_detection = 0; fz_k = 0; fz_high_limit = 0; fz_low_limit = 0;
-  tx_detection = 0; tx_k = 0; tx_high_limit = 0; tx_low_limit = 0;
-  ty_detection = 0; ty_k = 0; ty_high_limit = 0; ty_low_limit = 0;
-  tz_detection = 0; tz_k = 0; tz_high_limit = 0; tz_low_limit = 0;
 
 }
 void Ur10eFTsensor::offset_init(Eigen::MatrixXd data, bool time_check)

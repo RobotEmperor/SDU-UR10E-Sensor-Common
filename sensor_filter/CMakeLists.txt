@@ -13,6 +13,9 @@ add_compile_options(-std=c++11)
 find_package(Eigen3 REQUIRED)
 INCLUDE_DIRECTORIES (${EIGEN3_INCLUDE_DIR})
 
+set(LIB_HEADER_FILES
+   ${CMAKE_SOURCE_DIR}/include/sensor_filter/sensor_filter.h
+   )
 
 set( sensor_filter_SOURCE_FILES 
   src/sensor_filter.cpp

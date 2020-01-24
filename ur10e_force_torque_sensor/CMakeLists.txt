@@ -18,9 +18,9 @@ find_package(PkgConfig)
 pkg_check_modules(yaml_cpp yaml-cpp REQUIRED)
 
 
-#set(LIB_HEADER_FILES
-#        include/ur10e_force_torque_sensor/ur10e_force_torque_sensor.h
-#)
+set(LIB_HEADER_FILES
+        ${CMAKE_SOURCE_DIR}/include/ur10e_force_torque_sensor/ur10e_force_torque_sensor.h
+)
 
 INCLUDE_DIRECTORIES (${yaml_cpp_INCLUDE_DIRS})
 
