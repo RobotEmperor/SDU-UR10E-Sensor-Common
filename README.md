@@ -36,7 +36,6 @@ SDU-UR10E-Sensor-Common/ur10e_force_torque_sensor includes the following fuction
   Currently tested on:
 
 * Cmake 
-* Catkin (ROS Melodic compatible)
 
 ### Installation (Build Instruction)###
 
