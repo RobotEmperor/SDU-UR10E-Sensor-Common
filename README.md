@@ -12,7 +12,7 @@ SDU-UR10E-Sensor-Common/sensor_filter includes the following filters available:
 
 * Kalman Bucy Filter 
 
-SDU-UR10E-Sensor-Common/ur10e_force_torque_sensor includes the following fuctions available:
+SDU-UR10E-Sensor-Common/ur10e_force_torque_sensor includes the following functions available:
 
 * Signal Processing (Kalman filter)
 * Offset Tunner
