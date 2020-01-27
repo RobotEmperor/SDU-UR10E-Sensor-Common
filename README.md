@@ -87,9 +87,9 @@ For example(for LowPassFilter),
     lpf->cutoff_frequency = 20; // (20Hz)
     
     //in the control loop 
-    lpf->lpf_processing(input_data);
+    lpf->lpf_processing(input_data);// It returns double and you can use it. 
     
-    //program ended
+    //program is ended
     delete lpf;
     
 
@@ -107,7 +107,7 @@ For example(for KalmanFilter),
     
     KalmanFilter kalman_filter;
     kalman_filter = new KalmanFilter
-    kalman_filter.initialize(state_variables, measurement_variables); 
+    kalman_filter->initialize(state_variables, measurement_variables); 
     
     //this example is about only force torque sensor itself, so F,H,Q set identity matrix.
     KalmanFilter->F.setIdentity();
@@ -124,7 +124,7 @@ For example(for KalmanFilter),
     // output filtered data in matrix form
     // in here, the output is force X, force Y, Force Z, Torque X, Torque Y, Torque Z in 6 X 1 matrix form.
     
-    //program ended
+    //program is ended
     delete kalman_filter;
     
   ### ur10e_force_torque_sensor ###
@@ -135,11 +135,11 @@ For example(for KalmanFilter),
   
   * parse_init_data(const std::string &path)
   
-    To load sensor filter gains, you can insert the path of config.yaml.
+    To load sensor filter gains, you can insert the path of init_data.yaml.
   
   * initialize()
     
-    Variables is initialize in this function. 
+    Variables are initialized in this function. 
     
   * offset_init(Eigen::MatrixXd data, bool time_check)
   
@@ -147,7 +147,7 @@ For example(for KalmanFilter),
     
   * signal_processing(Eigen::MatrixXd data) 
   
-    Filter algorithms is included.(Now only kalman filter)
+    Filter algorithms are included.(Now only kalman filter)
     
   * collision_detection(Eigen::MatrixXd data)
   
@@ -159,7 +159,7 @@ For example (How to use the library)
     ft_sensor = new Ur10eFTsensor; 
     
     std::string init_data_path; // it is to load config file.
-    init_data_path = "../config/init_data.yaml"// it must be in your project.
+    init_data_path = "../config/init_data.yaml"; // it must be in your project.
     
     ft_sensor->parse_init_data(init_data_path);
     ft_sensor->initialize(); 
@@ -174,7 +174,7 @@ For example (How to use the library)
     
     // 
     
-    // program ended 
+    // program is ended 
     delete ft_sensor;
 
   
