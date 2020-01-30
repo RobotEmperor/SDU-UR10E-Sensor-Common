@@ -151,7 +151,7 @@ For example(for KalmanFilter),
     
   * collision_detection(Eigen::MatrixXd data)
   
-    This function can detect collision from raw force torque data by using CUSUM method (it was included in sdu_math library). It returns bool value 1 and -1 when collision is detected. (Value 0 is default and non-contact)
+    This function can detect collision from raw force torque data by using CUSUM method (it was included in sdu_math library). It returns int value 1 and -1 when collision is detected. (Value 0 is default and non-contact)
     
 For example (How to use the library)
 
