@@ -131,7 +131,7 @@ For example(for KalmanFilter),
 
   Ur10eFTsensor
   
-  This library is to use ur10e F/T sensor easily. It uses the sensor_filter library to filter raw force torque data. It also offers important data which can be used in control algorithm (for example, collision detection and pose estimation) 
+  This library is for using ur10e F/T sensor easily. It uses the sensor_filter library to filter raw force torque data. It also offers important data which can be used in control algorithm (for example, collision detection and pose estimation) 
   
   * parse_init_data(const std::string &path)
   
