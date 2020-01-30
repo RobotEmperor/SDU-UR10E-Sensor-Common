@@ -30,6 +30,7 @@ SDU-UR10E-Sensor-Common/ur10e_force_torque_sensor includes the following functio
 ## Compatible Operating Systems ##
   Currently tested on:
 
+* Ubuntu 16.04 (Xenial Xerus)
 * Ubuntu 18.04 (Bionic Beaver)
 
 ## Build ##
