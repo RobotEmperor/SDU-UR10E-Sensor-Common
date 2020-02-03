@@ -45,6 +45,7 @@ SDU-UR10E-Sensor-Common/ur10e_force_torque_sensor includes the following functio
     git clone https://github.com/RobotEmperor/SDU-UR10E-Sensor-Common.git
     cd SDU-UR10E-Sensor-Common
     cd sensor_filter
+    mkdir build
     cd build
     cmake ..
     make 
@@ -54,6 +55,7 @@ SDU-UR10E-Sensor-Common/ur10e_force_torque_sensor includes the following functio
     
     cd SDU-UR10E-Sensor-Common 
     cd ur10e_force_torque_sensor
+    mkdir build
     cd build
     cmake ..
     make 
