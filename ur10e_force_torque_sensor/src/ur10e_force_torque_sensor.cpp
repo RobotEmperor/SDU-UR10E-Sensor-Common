@@ -36,10 +36,16 @@ Ur10eFTsensor::Ur10eFTsensor()
 
   kalman_filter_force_torque = new KalmanFilter;
 
+  kalman_filter_force_torque_temp = new KalmanFilter;
+
   kalman_bucy_filter_force_torque = new KalmanBucyFilter;
 
   gain_q = 0;
-  gain_r = 0;
+  gain_r_low_frequency = 0;
+  gain_r_high_frequency = 0;
+
+  limit_low_rate_of_change = 0;
+  limit_high_rate_of_change = 0;
 
   fx_detection = 0; fx_k = 0; fx_high_limit = 0; fx_low_limit = 0;
   fy_detection = 0; fy_k = 0; fy_high_limit = 0; fy_low_limit = 0;
@@ -62,6 +68,7 @@ Ur10eFTsensor::~Ur10eFTsensor()
   delete low_pass_filter_tz; delete high_pass_filter_tz;
 
   delete kalman_filter_force_torque;
+  delete kalman_filter_force_torque_temp;
 }
 void Ur10eFTsensor::parse_init_data(const std::string &path)
 {
@@ -84,7 +91,11 @@ void Ur10eFTsensor::parse_init_data(const std::string &path)
   hpf_torque_cutoff_frequency = doc["hpf_torque_cutoff_frequency"].as<double>();
 
   gain_q = doc["gain_Q"].as<double>();
-  gain_r = doc["gain_R"].as<double>();
+  gain_r_low_frequency = doc["gain_R_low_frequency"].as<double>();
+  gain_r_high_frequency = doc["gain_R_high_frequency"].as<double>();
+
+  limit_low_rate_of_change = doc["limit_low_rate_of_change"].as<double>();
+  limit_high_rate_of_change = doc["limit_high_rate_of_change"].as<double>();
 
   fx_k = doc["fx_k"].as<double>();
   fy_k = doc["fy_k"].as<double>();
@@ -113,6 +124,15 @@ void Ur10eFTsensor::initialize()
 
   ft_filtered_data.resize(6, 1);
   ft_filtered_data.fill(0);
+
+  ft_filtered_data_temp.resize(6, 1);
+  ft_filtered_data_temp.fill(0);
+
+  pre_ft_filtered_data.resize(6,1);
+  pre_ft_filtered_data.fill(0);
+
+  rate_of_change_ft_filtered_data.resize(6,1);
+  rate_of_change_ft_filtered_data.fill(0);
 
   ft_offset_data.resize(6,1);
   ft_offset_data.fill(0);
@@ -166,7 +186,16 @@ void Ur10eFTsensor::initialize()
   kalman_filter_force_torque->R.setIdentity();
 
   kalman_filter_force_torque->Q = kalman_filter_force_torque->Q*gain_q; // sensor noise filtering  --> can be modified a external file.
-  kalman_filter_force_torque->R = kalman_filter_force_torque->R*gain_r; // sensor noise filtering  --> can be modified a external file.
+  kalman_filter_force_torque->R = kalman_filter_force_torque->R*gain_r_low_frequency; // sensor noise filtering  --> can be modified a external file.
+
+  kalman_filter_force_torque_temp->initialize(ft_filtered_data_temp,ft_filtered_data_temp);
+  kalman_filter_force_torque_temp->F.setIdentity();
+  kalman_filter_force_torque_temp->H.setIdentity();
+  kalman_filter_force_torque_temp->Q.setIdentity();
+  kalman_filter_force_torque_temp->R.setIdentity();
+
+  kalman_filter_force_torque_temp->Q = kalman_filter_force_torque_temp->Q*gain_q; // sensor noise filtering  --> can be modified a external file.
+  kalman_filter_force_torque_temp->R = kalman_filter_force_torque_temp->R*gain_r_low_frequency; // sensor noise filtering  --> can be modified a external file.
 
   kalman_bucy_filter_force_torque->initialize(ft_filtered_data,ft_filtered_data);
   kalman_bucy_filter_force_torque->F.setIdentity();
@@ -177,6 +206,9 @@ void Ur10eFTsensor::initialize()
   //kalman_bucy_filter_force_torque->R = kalman_bucy_filter_force_torque->R*0.003; // sensor noise filtering  --> can be modified a external file.
 
   kalman_bucy_filter_force_torque->control_time = control_time;
+
+
+
 
 }
 void Ur10eFTsensor::offset_init(Eigen::MatrixXd data, bool time_check)
@@ -201,6 +233,47 @@ void Ur10eFTsensor::signal_processing(Eigen::MatrixXd data)
 
   data = data - ft_offset_data;
   ft_filtered_data = kalman_filter_force_torque->kalman_filtering_processing(data);
+
+
+  rate_of_change_ft_filtered_data = (ft_filtered_data - pre_ft_filtered_data)*(1/control_time);
+
+
+  pre_ft_filtered_data = ft_filtered_data;
+
+  rate_of_change_ft_filtered_data(0,0) = low_pass_filter_fx->lpf_processing(rate_of_change_ft_filtered_data(0,0));
+  rate_of_change_ft_filtered_data(1,0) = low_pass_filter_fy->lpf_processing(rate_of_change_ft_filtered_data(1,0));
+  rate_of_change_ft_filtered_data(2,0) = low_pass_filter_fz->lpf_processing(rate_of_change_ft_filtered_data(2,0));
+
+  rate_of_change_ft_filtered_data(3,0) = low_pass_filter_tx->lpf_processing(rate_of_change_ft_filtered_data(3,0));
+  rate_of_change_ft_filtered_data(4,0) = low_pass_filter_ty->lpf_processing(rate_of_change_ft_filtered_data(4,0));
+  rate_of_change_ft_filtered_data(5,0) = low_pass_filter_tz->lpf_processing(rate_of_change_ft_filtered_data(5,0));
+
+  for(int num = 0; num < 3; num ++)
+  {
+    if(rate_of_change_ft_filtered_data(num,0) >  limit_high_rate_of_change || rate_of_change_ft_filtered_data(num,0) < limit_low_rate_of_change)
+    {
+      kalman_filter_force_torque->R(num,num) = gain_r_high_frequency;
+    }
+    else
+    {
+      kalman_filter_force_torque->R(num,num) = gain_r_low_frequency;
+    }
+  }
+  for(int num = 3; num < 6; num ++)
+   {
+     if(rate_of_change_ft_filtered_data(num,0) >  limit_high_rate_of_change*0.15 || rate_of_change_ft_filtered_data(num,0) < limit_low_rate_of_change*0.15)
+     {
+       kalman_filter_force_torque->R(num,num) = gain_r_high_frequency;
+     }
+     else
+     {
+       kalman_filter_force_torque->R(num,num) = gain_r_low_frequency;
+     }
+   }
+
+  std::cout << kalman_filter_force_torque->R << "\n\n";
+
+  ft_filtered_data_temp = kalman_filter_force_torque_temp->kalman_filtering_processing(data);
 
 
   //kalman bucy filer

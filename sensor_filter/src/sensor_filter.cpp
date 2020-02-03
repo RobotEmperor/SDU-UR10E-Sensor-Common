@@ -131,7 +131,6 @@ void KalmanFilter::initialize(Eigen::MatrixXd state_variables, Eigen::MatrixXd m
   //kalman gain
   kalman_gain_k.resize(state_variables.rows(),state_variables.rows());
   kalman_gain_k.fill(0);
-
 }
 Eigen::MatrixXd KalmanFilter::kalman_filtering_processing(Eigen::MatrixXd measurement_z)
 {
@@ -139,18 +138,22 @@ Eigen::MatrixXd KalmanFilter::kalman_filtering_processing(Eigen::MatrixXd measur
 
   prediction_value_x = F * previous_correction_value_x;
 
+  prediction_value_p = F * correction_value_p * F.transpose() + Q;
+
+  if((H * prediction_value_p * H.transpose() + R).determinant() == 0)
+  {
+    return correction_value_x;
+  }
+
   kalman_gain_k = prediction_value_p * H.transpose() * ((H * prediction_value_p * H.transpose() + R).inverse());
 
   correction_value_x = prediction_value_x + kalman_gain_k * (measurement_z - (H * prediction_value_x));
 
   correction_value_p = prediction_value_p - (kalman_gain_k * H * prediction_value_p);
 
-  prediction_value_p = F * correction_value_p * F.transpose() + Q;
-
   previous_correction_value_x = correction_value_x;
   previous_correction_value_p = correction_value_p;
 
-//
   return correction_value_x;
 }
 ////////////////////////////////////////////////////////////////////////////
@@ -210,12 +213,12 @@ Eigen::MatrixXd KalmanBucyFilter::kalman_bucy_filtering_processing(Eigen::Matrix
   kalman_gain_k = estimated_value_p * H.transpose() * R.inverse();
 
   dt_value_x = F * estimated_value_x + kalman_gain_k * (measurement_z - (H * estimated_value_x));
-//
+  //
   dt_value_p = F * estimated_value_p + estimated_value_p * F.transpose() - (kalman_gain_k * R * kalman_gain_k.transpose()) + Q;
-//
+  //
   estimated_value_x += ((pre_dt_value_x + dt_value_x)*control_time)/2;
   estimated_value_p += ((pre_dt_value_p + dt_value_p)*control_time)/2; // trapezoidal method integral
-//
+  //
   pre_dt_value_x = dt_value_x;
   pre_dt_value_p = dt_value_p;
 

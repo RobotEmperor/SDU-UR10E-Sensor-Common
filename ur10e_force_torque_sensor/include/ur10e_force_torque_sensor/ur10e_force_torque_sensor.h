@@ -67,14 +67,26 @@ class Ur10eFTsensor
     HighPassFilter *high_pass_filter_tz;
 
     KalmanFilter  *kalman_filter_force_torque;
+    KalmanFilter  *kalman_filter_force_torque_temp;
     KalmanBucyFilter  *kalman_bucy_filter_force_torque;
 
     double gain_q;
-    double gain_r;
+    double gain_r_low_frequency;
+    double gain_r_high_frequency;
+
+    double limit_low_rate_of_change;
+    double limit_high_rate_of_change;
 
 
     Eigen::MatrixXd ft_filtered_data;
+
+    Eigen::MatrixXd ft_filtered_data_temp;
+
     Eigen::MatrixXd ft_offset_data;
+
+    Eigen::MatrixXd pre_ft_filtered_data;
+    Eigen::MatrixXd rate_of_change_ft_filtered_data;
+
 
   private:
 };

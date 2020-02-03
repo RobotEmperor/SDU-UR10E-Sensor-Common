@@ -12,6 +12,7 @@
 #include <iostream>
 #include <math.h>
 #include <Eigen/Dense>
+#include "sdu_math/statistics_math.h"
 
 
 class LowPassFilter // lpf

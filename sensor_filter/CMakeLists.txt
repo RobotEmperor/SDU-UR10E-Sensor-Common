@@ -20,7 +20,10 @@ set(LIB_HEADER_FILES
 set( sensor_filter_SOURCE_FILES 
   src/sensor_filter.cpp
 )
+
+link_directories(/usr/local/lib)
 add_library(sensor_filter SHARED ${sensor_filter_SOURCE_FILES} ${LIB_HEADER_FILES})
+target_link_libraries(sensor_filter sdu_math)
 
 if (CMAKE_COMPILER_IS_GNUCXX)
 		# Give error in Linux if library is not fully linked (like Windows)
