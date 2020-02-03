@@ -44,6 +44,10 @@ Ur10eFTsensor::Ur10eFTsensor()
   gain_r_low_frequency = 0;
   gain_r_high_frequency = 0;
 
+  gain_r_torque_low_frequency = 0;
+  gain_r_torque_high_frequency = 0;
+
+
   limit_low_rate_of_change = 0;
   limit_high_rate_of_change = 0;
 
@@ -93,6 +97,9 @@ void Ur10eFTsensor::parse_init_data(const std::string &path)
   gain_q = doc["gain_Q"].as<double>();
   gain_r_low_frequency = doc["gain_R_low_frequency"].as<double>();
   gain_r_high_frequency = doc["gain_R_high_frequency"].as<double>();
+
+  gain_r_torque_low_frequency = doc["gain_R_torque_low_frequency"].as<double>();
+  gain_r_torque_high_frequency = doc["gain_R_torque_high_frequency"].as<double>();
 
   limit_low_rate_of_change = doc["limit_low_rate_of_change"].as<double>();
   limit_high_rate_of_change = doc["limit_high_rate_of_change"].as<double>();
@@ -263,15 +270,13 @@ void Ur10eFTsensor::signal_processing(Eigen::MatrixXd data)
    {
      if(rate_of_change_ft_filtered_data(num,0) >  limit_high_rate_of_change*0.15 || rate_of_change_ft_filtered_data(num,0) < limit_low_rate_of_change*0.15)
      {
-       kalman_filter_force_torque->R(num,num) = gain_r_high_frequency;
+       kalman_filter_force_torque->R(num,num) = gain_r_torque_high_frequency;
      }
      else
      {
-       kalman_filter_force_torque->R(num,num) = gain_r_low_frequency;
+       kalman_filter_force_torque->R(num,num) = gain_r_torque_low_frequency;
      }
    }
-
-  std::cout << kalman_filter_force_torque->R << "\n\n";
 
   ft_filtered_data_temp = kalman_filter_force_torque_temp->kalman_filtering_processing(data);
 

@@ -74,6 +74,10 @@ class Ur10eFTsensor
     double gain_r_low_frequency;
     double gain_r_high_frequency;
 
+    double gain_r_torque_low_frequency;
+    double gain_r_torque_high_frequency;
+
+
     double limit_low_rate_of_change;
     double limit_high_rate_of_change;
 
