@@ -15,7 +15,7 @@ SDU-UR10E-Sensor-Common/sensor_filter includes the following filters available:
 SDU-UR10E-Sensor-Common/ur10e_force_torque_sensor includes the following functions available:
 
 * Signal Processing (Kalman filter)
-** Adaptive gain algorithm (can change the kalman filter sensor noise gain R depending on the rate of changes of raw sensor data)
+ * * Adaptive gain algorithm (can change the kalman filter sensor noise gain R depending on the rate of changes of raw sensor data)
 * Offset Tunner
 * A filter gain file load using YAML 
 * Collision Detection
