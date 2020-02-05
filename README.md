@@ -179,6 +179,20 @@ For example (How to use the library)
     
     // program is ended 
     delete ft_sensor;
+    
+For example (Load gain file YAML)
+
+    Ur10eFTsensor ft_sensor;
+    ft_sensor = new Ur10eFTsensor; 
+    
+    std::string init_data_path; // it is to load config file.
+    init_data_path = "../config/init_data.yaml"; // it must be in your project.
+    
+    ft_sensor->parse_init_data(init_data_path);
+    ft_sensor->initialize(); 
+    
+    
+    
 
   
   
