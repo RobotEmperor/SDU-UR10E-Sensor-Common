@@ -327,7 +327,7 @@ PoseEstimation::~PoseEstimation()
 void PoseEstimation::initialize()
 {
   control_time = 0.0;
-  mass_of_tool = 4.11; // must be changed
+  mass_of_tool = 4.1118; // must be changed
   tool_pose_data.resize(6,1);
   tool_vel_data.resize(6,1);
   tool_acc_data.resize(6,1);
@@ -370,7 +370,7 @@ void PoseEstimation::initialize()
   kalman_filter_linear_acc->Q.setIdentity();
   kalman_filter_linear_acc->R.setIdentity();
 
-  kalman_filter_linear_acc->R = kalman_filter_linear_acc->R*2000; // sensor noise filtering  --> can be modified a external file.
+  kalman_filter_linear_acc->R = kalman_filter_linear_acc->R*1000; // sensor noise filtering  --> can be modified a external file.
 }
 
 void PoseEstimation::offset_init(Eigen::MatrixXd data, bool time_check)
