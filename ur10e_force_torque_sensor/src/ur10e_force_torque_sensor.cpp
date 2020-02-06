@@ -32,8 +32,6 @@ Ur10eFTsensor::Ur10eFTsensor()
   hpf_force_cutoff_frequency  = 0;
   hpf_torque_cutoff_frequency = 0;
 
-  ft_raw_data = 0;
-
   kalman_filter_force_torque = new KalmanFilter;
 
   kalman_filter_force_torque_temp = new KalmanFilter;
@@ -127,7 +125,8 @@ void Ur10eFTsensor::parse_init_data(const std::string &path)
 }
 void Ur10eFTsensor::initialize()
 {
-  ft_raw_data = 0.0;
+  ft_raw_data.resize(6,1);
+  ft_raw_data.fill(0);
 
   ft_filtered_data.resize(6, 1);
   ft_filtered_data.fill(0);
@@ -218,21 +217,21 @@ void Ur10eFTsensor::initialize()
 
 
 }
-void Ur10eFTsensor::offset_init(Eigen::MatrixXd data, bool time_check)
+void Ur10eFTsensor::offset_init(Eigen::MatrixXd data, int desired_sample_num)
 {
   static int sample_num = 0;
 
-  if(time_check == false)
-  {
-    ft_offset_data = ft_offset_data/sample_num;
-    sample_num = 0;
-    return;
-  }
-  else
-  {
-    ft_offset_data += data;
-    sample_num ++;
-  }
+    if(sample_num > desired_sample_num)
+    {
+      ft_offset_data = ft_offset_data/sample_num;
+      sample_num = 0;
+      return;
+    }
+    else
+    {
+      ft_offset_data += data;
+      sample_num ++;
+    }
 }
 void Ur10eFTsensor::signal_processing(Eigen::MatrixXd data)
 {
@@ -370,14 +369,14 @@ void PoseEstimation::initialize()
   kalman_filter_linear_acc->Q.setIdentity();
   kalman_filter_linear_acc->R.setIdentity();
 
-  kalman_filter_linear_acc->R = kalman_filter_linear_acc->R*1000; // sensor noise filtering  --> can be modified a external file.
+  kalman_filter_linear_acc->R = kalman_filter_linear_acc->R*200; // sensor noise filtering  --> can be modified a external file.
 }
 
-void PoseEstimation::offset_init(Eigen::MatrixXd data, bool time_check)
+void PoseEstimation::offset_init(Eigen::MatrixXd data,  int desired_sample_num)
 {
   static int sample_num = 0;
 
-  if(time_check == false)
+  if(sample_num > desired_sample_num)
   {
     offset_data = offset_data/sample_num;
     sample_num = 0;
@@ -396,12 +395,14 @@ void PoseEstimation::estimation_processing(Eigen::MatrixXd data) // input entire
   tool_linear_acc_data = tool_linear_acc_data - offset_data;
 
 
-  filtered_data = kalman_filter_linear_acc->kalman_filtering_processing(tool_linear_acc_data);
+  //filtered_data = kalman_filter_linear_acc->kalman_filtering_processing(tool_linear_acc_data);
 
   //calculate contact force
-  contacted_force_torque(0,0) = data(0,0) -(mass_of_tool * filtered_data(0,0))*-1;
-  contacted_force_torque(1,0) = data(1,0) -(mass_of_tool * filtered_data(1,0))*-1;
-  contacted_force_torque(2,0) = data(2,0) -(mass_of_tool * filtered_data(2,0))*-1;
+  contacted_force_torque(0,0) = data(0,0) -(mass_of_tool * tool_linear_acc_data(0,0))*-1;
+  contacted_force_torque(1,0) = data(1,0) -(mass_of_tool * tool_linear_acc_data(1,0))*-1;
+  contacted_force_torque(2,0) = data(2,0) -(mass_of_tool * tool_linear_acc_data(2,0))*-1;
+
+  filtered_data = kalman_filter_linear_acc->kalman_filtering_processing(contacted_force_torque);
 
   //calculate inertia of tool
   //inertia_of_tool(0,0) = data(3,0)/tool_acc_data(3,0);

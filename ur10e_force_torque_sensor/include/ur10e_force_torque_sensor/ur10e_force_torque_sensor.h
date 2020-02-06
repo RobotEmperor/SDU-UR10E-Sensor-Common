@@ -25,7 +25,7 @@ class Ur10eFTsensor
     Ur10eFTsensor();
     ~Ur10eFTsensor();
     void initialize();
-    void offset_init(Eigen::MatrixXd data, bool time_check);
+    void offset_init(Eigen::MatrixXd data, int desired_sample_num);
     void signal_processing(Eigen::MatrixXd data); // 6*1 data fx fy fz tx ty tz
     void parse_init_data(const std::string &path);
 
@@ -45,9 +45,6 @@ class Ur10eFTsensor
     double tx_detection, tx_k, tx_high_limit, tx_low_limit;
     double ty_detection, ty_k, ty_high_limit, ty_low_limit;
     double tz_detection, tz_k, tz_high_limit, tz_low_limit;
-
-
-    double ft_raw_data;
 
     //filter will be added
     LowPassFilter *low_pass_filter_fx;
@@ -88,6 +85,8 @@ class Ur10eFTsensor
 
     Eigen::MatrixXd ft_offset_data;
 
+    Eigen::MatrixXd ft_raw_data;
+
     Eigen::MatrixXd pre_ft_filtered_data;
     Eigen::MatrixXd rate_of_change_ft_filtered_data;
 
@@ -102,7 +101,7 @@ class PoseEstimation
     ~PoseEstimation();
     void initialize();
     void estimation_processing(Eigen::MatrixXd data); // 6*1 data fx fy fz tx ty tz
-    void offset_init(Eigen::MatrixXd data, bool time_check);
+    void offset_init(Eigen::MatrixXd data, int desired_sample_num);
 
     //initialize
 
