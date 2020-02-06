@@ -223,8 +223,8 @@ void Ur10eFTsensor::offset_init(Eigen::MatrixXd data, int desired_sample_num)
 
     if(sample_num > desired_sample_num)
     {
-      ft_offset_data = ft_offset_data/sample_num;
-      sample_num = 0;
+      ft_offset_data = ft_offset_data/(sample_num-1);
+      //sample_num = 0;
       return;
     }
     else
