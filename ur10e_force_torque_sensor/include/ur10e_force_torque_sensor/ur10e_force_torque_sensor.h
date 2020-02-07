@@ -67,6 +67,8 @@ class Ur10eFTsensor
     KalmanFilter  *kalman_filter_force_torque_temp;
     KalmanBucyFilter  *kalman_bucy_filter_force_torque;
 
+    KalmanFilter *ft_contact;
+
     double gain_q;
     double gain_r_low_frequency;
     double gain_r_high_frequency;

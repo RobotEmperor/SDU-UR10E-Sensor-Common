@@ -36,6 +36,8 @@ Ur10eFTsensor::Ur10eFTsensor()
 
   kalman_filter_force_torque_temp = new KalmanFilter;
 
+  ft_contact = new KalmanFilter;
+
   kalman_bucy_filter_force_torque = new KalmanBucyFilter;
 
   gain_q = 0;
@@ -214,24 +216,32 @@ void Ur10eFTsensor::initialize()
   kalman_bucy_filter_force_torque->control_time = control_time;
 
 
+  ft_contact ->B.setIdentity();
+  ft_contact ->initialize(ft_filtered_data,ft_filtered_data);
+  ft_contact ->F.setIdentity();
+  ft_contact ->H.setIdentity();
+  ft_contact ->Q.setIdentity();
+  ft_contact ->R.setIdentity();
+  ft_contact ->Q = ft_contact->Q*0.001; // sensor noise filtering  --> can be modified a external file.
+  ft_contact ->R = ft_contact->R*2; // sensor noise filtering  --> can be modified a external file.
+
+
 
 
 }
 void Ur10eFTsensor::offset_init(Eigen::MatrixXd data, int desired_sample_num)
 {
-  static int sample_num = 0;
+  static int sample_num = 1;
 
-    if(sample_num > desired_sample_num)
-    {
-      ft_offset_data = ft_offset_data/(sample_num-1);
-      //sample_num = 0;
-      return;
-    }
-    else
-    {
-      ft_offset_data += data;
-      sample_num ++;
-    }
+  ft_offset_data += data;
+
+  if(sample_num == desired_sample_num)
+  {
+    ft_offset_data = ft_offset_data/(sample_num);
+    sample_num = 1;
+    return;
+  }
+  sample_num ++;
 }
 void Ur10eFTsensor::signal_processing(Eigen::MatrixXd data)
 {
@@ -266,18 +276,24 @@ void Ur10eFTsensor::signal_processing(Eigen::MatrixXd data)
     }
   }
   for(int num = 3; num < 6; num ++)
-   {
-     if(rate_of_change_ft_filtered_data(num,0) >  limit_high_rate_of_change*0.15 || rate_of_change_ft_filtered_data(num,0) < limit_low_rate_of_change*0.15)
-     {
-       kalman_filter_force_torque->R(num,num) = gain_r_torque_high_frequency;
-     }
-     else
-     {
-       kalman_filter_force_torque->R(num,num) = gain_r_torque_low_frequency;
-     }
-   }
+  {
+    if(rate_of_change_ft_filtered_data(num,0) >  limit_high_rate_of_change*0.15 || rate_of_change_ft_filtered_data(num,0) < limit_low_rate_of_change*0.15)
+    {
+      kalman_filter_force_torque->R(num,num) = gain_r_torque_high_frequency;
+    }
+    else
+    {
+      kalman_filter_force_torque->R(num,num) = gain_r_torque_low_frequency;
+    }
+  }
 
-  ft_filtered_data_temp = kalman_filter_force_torque_temp->kalman_filtering_processing(data);
+ // ft_filtered_data_temp = kalman_filter_force_torque_temp->kalman_filtering_processing(data);
+
+
+
+
+  ft_filtered_data_temp = ft_contact->kalman_filtering_processing(ft_filtered_data_temp);
+
 
 
   //kalman bucy filer
@@ -369,30 +385,29 @@ void PoseEstimation::initialize()
   kalman_filter_linear_acc->Q.setIdentity();
   kalman_filter_linear_acc->R.setIdentity();
 
-  kalman_filter_linear_acc->R = kalman_filter_linear_acc->R*200; // sensor noise filtering  --> can be modified a external file.
+  kalman_filter_linear_acc->R = kalman_filter_linear_acc->R*500; // sensor noise filtering  --> can be modified a external file.
 }
 
 void PoseEstimation::offset_init(Eigen::MatrixXd data,  int desired_sample_num)
 {
-  static int sample_num = 0;
+  static int sample_num = 1;
 
-  if(sample_num > desired_sample_num)
+  offset_data += data;
+
+  if(sample_num == desired_sample_num)
   {
-    offset_data = offset_data/sample_num;
-    sample_num = 0;
+    offset_data = offset_data/(sample_num);
+    sample_num = 1;
     return;
   }
-  else
-  {
-    offset_data += data;
-    sample_num ++;
-  }
+  sample_num ++;
 }
 
 
 void PoseEstimation::estimation_processing(Eigen::MatrixXd data) // input entire force torque
 {
-  tool_linear_acc_data = tool_linear_acc_data - offset_data;
+ // tool_linear_acc_data = tool_linear_acc_data - offset_data;
+
 
 
   //filtered_data = kalman_filter_linear_acc->kalman_filtering_processing(tool_linear_acc_data);
@@ -402,7 +417,7 @@ void PoseEstimation::estimation_processing(Eigen::MatrixXd data) // input entire
   contacted_force_torque(1,0) = data(1,0) -(mass_of_tool * tool_linear_acc_data(1,0))*-1;
   contacted_force_torque(2,0) = data(2,0) -(mass_of_tool * tool_linear_acc_data(2,0))*-1;
 
-  filtered_data = kalman_filter_linear_acc->kalman_filtering_processing(contacted_force_torque);
+  filtered_data = contacted_force_torque;
 
   //calculate inertia of tool
   //inertia_of_tool(0,0) = data(3,0)/tool_acc_data(3,0);

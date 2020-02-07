@@ -100,10 +100,18 @@ void KalmanFilter::initialize(Eigen::MatrixXd state_variables, Eigen::MatrixXd m
   Q.resize(state_variables.rows(),state_variables.rows());
   R.resize(measurement_variables.rows(),measurement_variables.rows());
 
+  B.resize(state_variables.rows(),state_variables.rows());
+  U.resize(state_variables.rows(),state_variables.cols());
+  Z.resize(state_variables.rows(),state_variables.cols());
+
   F.setIdentity();
   H.setIdentity();
   Q.setIdentity();
   R.setIdentity();
+
+  B.fill(0);
+  U.fill(0);
+  Z.fill(0);
 
   //intial condition
   correction_value_x.resize(state_variables.rows(),state_variables.cols());
@@ -136,7 +144,7 @@ Eigen::MatrixXd KalmanFilter::kalman_filtering_processing(Eigen::MatrixXd measur
 {
 
 
-  prediction_value_x = F * previous_correction_value_x;
+  prediction_value_x = F * previous_correction_value_x + B*U;
 
   prediction_value_p = F * correction_value_p * F.transpose() + Q;
 

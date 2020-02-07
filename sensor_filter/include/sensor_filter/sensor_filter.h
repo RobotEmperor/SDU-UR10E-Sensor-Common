@@ -67,6 +67,10 @@ class KalmanFilter // kf
     Eigen::MatrixXd Q;
     Eigen::MatrixXd R;
 
+    Eigen::MatrixXd B;
+    Eigen::MatrixXd U;
+    Eigen::MatrixXd Z;
+
     //intial condition
     Eigen::MatrixXd correction_value_x;
     Eigen::MatrixXd correction_value_p;
