@@ -47,27 +47,22 @@ class Ur10eFTsensor
     double tz_detection, tz_k, tz_high_limit, tz_low_limit;
 
     //filter will be added
-    LowPassFilter *low_pass_filter_fx;
-    LowPassFilter *low_pass_filter_fy;
-    LowPassFilter *low_pass_filter_fz;
-
-    LowPassFilter *low_pass_filter_tx;
-    LowPassFilter *low_pass_filter_ty;
-    LowPassFilter *low_pass_filter_tz;
-
-    HighPassFilter *high_pass_filter_fx;
-    HighPassFilter *high_pass_filter_fy;
-    HighPassFilter *high_pass_filter_fz;
-
-    HighPassFilter *high_pass_filter_tx;
-    HighPassFilter *high_pass_filter_ty;
-    HighPassFilter *high_pass_filter_tz;
-
-    KalmanFilter  *kalman_filter_force_torque;
-    KalmanFilter  *kalman_filter_force_torque_temp;
-    KalmanBucyFilter  *kalman_bucy_filter_force_torque;
-
-    KalmanFilter *ft_contact;
+    std::shared_ptr<LowPassFilter> low_pass_filter_fx;
+    std::shared_ptr<LowPassFilter> low_pass_filter_fy;
+    std::shared_ptr<LowPassFilter> low_pass_filter_fz;
+    std::shared_ptr<LowPassFilter> low_pass_filter_tx;
+    std::shared_ptr<LowPassFilter> low_pass_filter_ty;
+    std::shared_ptr<LowPassFilter> low_pass_filter_tz;
+    std::shared_ptr<HighPassFilter> high_pass_filter_fx;
+    std::shared_ptr<HighPassFilter> high_pass_filter_fy;
+    std::shared_ptr<HighPassFilter> high_pass_filter_fz;
+    std::shared_ptr<HighPassFilter> high_pass_filter_tx;
+    std::shared_ptr<HighPassFilter> high_pass_filter_ty;
+    std::shared_ptr<HighPassFilter> high_pass_filter_tz;
+    std::shared_ptr<KalmanFilter> kalman_filter_force_torque;
+    std::shared_ptr<KalmanFilter> kalman_filter_force_torque_temp;
+    std::shared_ptr<KalmanBucyFilter> kalman_bucy_filter_force_torque;
+    std::shared_ptr<KalmanFilter> ft_contact;
 
     double gain_q;
     double gain_r_low_frequency;
@@ -124,7 +119,7 @@ class PoseEstimation
     Eigen::MatrixXd contacted_force_torque;
 
     //filter
-    KalmanFilter  *kalman_filter_linear_acc;
+    std::shared_ptr<KalmanFilter> kalman_filter_linear_acc;
 
     Eigen::MatrixXd filtered_data;
     Eigen::MatrixXd offset_data;

@@ -10,35 +10,11 @@
 
 Ur10eFTsensor::Ur10eFTsensor()
 {
-  low_pass_filter_fx= new LowPassFilter;
-  low_pass_filter_fy= new LowPassFilter;
-  low_pass_filter_fz= new LowPassFilter;
-
-  low_pass_filter_tx= new LowPassFilter;
-  low_pass_filter_ty= new LowPassFilter;
-  low_pass_filter_tz= new LowPassFilter;
-
-  high_pass_filter_fx= new HighPassFilter;
-  high_pass_filter_fy= new HighPassFilter;
-  high_pass_filter_fz= new HighPassFilter;
-  high_pass_filter_tx= new HighPassFilter;
-  high_pass_filter_ty= new HighPassFilter;
-  high_pass_filter_tz= new HighPassFilter;
-
-
   control_time = 0;
   lpf_force_cutoff_frequency  = 0;
   lpf_torque_cutoff_frequency = 0;
   hpf_force_cutoff_frequency  = 0;
   hpf_torque_cutoff_frequency = 0;
-
-  kalman_filter_force_torque = new KalmanFilter;
-
-  kalman_filter_force_torque_temp = new KalmanFilter;
-
-  ft_contact = new KalmanFilter;
-
-  kalman_bucy_filter_force_torque = new KalmanBucyFilter;
 
   gain_q = 0;
   gain_r_low_frequency = 0;
@@ -64,15 +40,6 @@ Ur10eFTsensor::Ur10eFTsensor()
 
 Ur10eFTsensor::~Ur10eFTsensor()
 {
-  delete low_pass_filter_fx; delete high_pass_filter_fx;
-  delete low_pass_filter_fy; delete high_pass_filter_fy;
-  delete low_pass_filter_fz; delete high_pass_filter_fz;
-  delete low_pass_filter_tx; delete high_pass_filter_tx;
-  delete low_pass_filter_ty; delete high_pass_filter_ty;
-  delete low_pass_filter_tz; delete high_pass_filter_tz;
-
-  delete kalman_filter_force_torque;
-  delete kalman_filter_force_torque_temp;
 }
 void Ur10eFTsensor::parse_init_data(const std::string &path)
 {
@@ -336,7 +303,6 @@ PoseEstimation::PoseEstimation()
 
 PoseEstimation::~PoseEstimation()
 {
-  delete kalman_filter_linear_acc;
 }
 
 void PoseEstimation::initialize()
@@ -371,7 +337,7 @@ void PoseEstimation::initialize()
   contacted_force_torque.fill(0);
   //////////////////////////////////
 
-  kalman_filter_linear_acc = new KalmanFilter; // for linear acc sensor
+  //kalman_filter_linear_acc = new KalmanFilter; // for linear acc sensor
 
   filtered_data.resize(6,1);
   filtered_data.fill(0);
