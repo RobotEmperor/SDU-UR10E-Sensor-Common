@@ -47,12 +47,12 @@ class Ur10eFTsensor
     double tz_detection, tz_k, tz_high_limit, tz_low_limit;
 
     //filter will be added
-    std::shared_ptr<LowPassFilter> low_pass_filter_fx;
-    std::shared_ptr<LowPassFilter> low_pass_filter_fy;
-    std::shared_ptr<LowPassFilter> low_pass_filter_fz;
-    std::shared_ptr<LowPassFilter> low_pass_filter_tx;
-    std::shared_ptr<LowPassFilter> low_pass_filter_ty;
-    std::shared_ptr<LowPassFilter> low_pass_filter_tz;
+    std::shared_ptr<LowPassFilter>  low_pass_filter_fx;
+    std::shared_ptr<LowPassFilter>  low_pass_filter_fy;
+    std::shared_ptr<LowPassFilter>  low_pass_filter_fz;
+    std::shared_ptr<LowPassFilter>  low_pass_filter_tx;
+    std::shared_ptr<LowPassFilter>  low_pass_filter_ty;
+    std::shared_ptr<LowPassFilter>  low_pass_filter_tz;
     std::shared_ptr<HighPassFilter> high_pass_filter_fx;
     std::shared_ptr<HighPassFilter> high_pass_filter_fy;
     std::shared_ptr<HighPassFilter> high_pass_filter_fz;

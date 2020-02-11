@@ -10,6 +10,25 @@
 
 Ur10eFTsensor::Ur10eFTsensor()
 {
+  low_pass_filter_fx  = std::make_shared<LowPassFilter>();
+  low_pass_filter_fy  = std::make_shared<LowPassFilter>();
+  low_pass_filter_fz  = std::make_shared<LowPassFilter>();
+  low_pass_filter_tx  = std::make_shared<LowPassFilter>();
+  low_pass_filter_ty  = std::make_shared<LowPassFilter>();
+  low_pass_filter_tz  = std::make_shared<LowPassFilter>();
+  high_pass_filter_fx = std::make_shared<HighPassFilter>();
+  high_pass_filter_fy = std::make_shared<HighPassFilter>();
+  high_pass_filter_fz = std::make_shared<HighPassFilter>();
+  high_pass_filter_tx = std::make_shared<HighPassFilter>();
+  high_pass_filter_ty = std::make_shared<HighPassFilter>();
+  high_pass_filter_tz = std::make_shared<HighPassFilter>();
+
+  kalman_filter_force_torque = std::make_shared<KalmanFilter>();
+  kalman_filter_force_torque_temp = std::make_shared<KalmanFilter>();
+  kalman_bucy_filter_force_torque = std::make_shared<KalmanBucyFilter>();
+  ft_contact = std::make_shared<KalmanFilter>();
+
+
   control_time = 0;
   lpf_force_cutoff_frequency  = 0;
   lpf_torque_cutoff_frequency = 0;
@@ -192,9 +211,6 @@ void Ur10eFTsensor::initialize()
   ft_contact ->Q = ft_contact->Q*0.001; // sensor noise filtering  --> can be modified a external file.
   ft_contact ->R = ft_contact->R*2; // sensor noise filtering  --> can be modified a external file.
 
-
-
-
 }
 void Ur10eFTsensor::offset_init(Eigen::MatrixXd data, int desired_sample_num)
 {
@@ -259,7 +275,7 @@ void Ur10eFTsensor::signal_processing(Eigen::MatrixXd data)
 
 
 
-  ft_filtered_data_temp = ft_contact->kalman_filtering_processing(ft_filtered_data_temp);
+  //ft_filtered_data_temp = ft_contact->kalman_filtering_processing(ft_filtered_data_temp);
 
 
 
@@ -338,6 +354,7 @@ void PoseEstimation::initialize()
   //////////////////////////////////
 
   //kalman_filter_linear_acc = new KalmanFilter; // for linear acc sensor
+  kalman_filter_linear_acc = std::make_shared<KalmanFilter>();
 
   filtered_data.resize(6,1);
   filtered_data.fill(0);
