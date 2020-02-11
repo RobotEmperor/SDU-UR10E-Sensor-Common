@@ -84,16 +84,13 @@ SDU-UR10E-Sensor-Common/ur10e_force_torque_sensor includes the following functio
 
 For example(for LowPassFilter), 
 
-    LowPassFilter lpf;
-    lpf = new LowPassFilter;
+    std::shared_ptr<LowPassFilter> lpf;
     lpf->control_time = 0.002; //(500Hz)
     lpf->cutoff_frequency = 20; // (20Hz)
     
     //in the control loop 
     lpf->lpf_processing(input_data);// It returns double and you can use it. 
     
-    //program is ended
-    delete lpf;
     
 
 * KalmanFilter & KalmanBucyFilter
@@ -108,8 +105,7 @@ For example(for KalmanFilter),
     state_variables.resize(6,1); // only force torque itself. 
     measurement_variables.resize(6,1);
     
-    KalmanFilter kalman_filter;
-    kalman_filter = new KalmanFilter
+    std::shared_ptr<KalmanFilter> kalman_filter;
     kalman_filter->initialize(state_variables, measurement_variables); 
     
     //this example is about only force torque sensor itself, so F,H,Q set identity matrix.
@@ -125,10 +121,7 @@ For example(for KalmanFilter),
     //in the control loop 
     KalmanFilter->kalman_filtering_processing(measurement_variables); // this function return to Eigen::MatrixXd
     // output filtered data in matrix form
-    // in here, the output is force X, force Y, Force Z, Torque X, Torque Y, Torque Z in 6 X 1 matrix form.
-    
-    //program is ended
-    delete kalman_filter;
+    // in here, the output is force X, force Y, Force Z, Torque X, Torque Y, Torque Z in 6 X 1 matrix form
     
   ### ur10e_force_torque_sensor ###
 
@@ -158,8 +151,7 @@ For example(for KalmanFilter),
     
 For example (How to use the library)
 
-    Ur10eFTsensor ft_sensor;
-    ft_sensor = new Ur10eFTsensor; 
+    std::shared_ptr<Ur10eFTsensor> ft_sensor;
     
     std::string init_data_path; // it is to load config file.
     init_data_path = "../config/init_data.yaml"; // it must be in your project.
@@ -173,17 +165,11 @@ For example (How to use the library)
     
     // you can use this variables in your control algorithm "ft_sensor->ft_filtered_data"
     
-    ft_sensor->collision_detection_processing(raw_force_torque_data); // this is to detect contact and collision 
-    
-    // 
-    
-    // program is ended 
-    delete ft_sensor;
+    ft_sensor->collision_detection_processing(raw_force_torque_data); // this is to detect contact and collision
     
 For example (Load gain file YAML)
 
-    Ur10eFTsensor ft_sensor;
-    ft_sensor = new Ur10eFTsensor; 
+    std::shared_ptr<Ur10eFTsensor> ft_sensor;
     
     std::string init_data_path; // it is to load config file.
     init_data_path = "../config/init_data.yaml"; // it must be in your project.
