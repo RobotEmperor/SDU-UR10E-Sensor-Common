@@ -9,6 +9,7 @@ SET ( CMAKE_C_COMPILER "gcc" )
 INCLUDE_DIRECTORIES (${CMAKE_SOURCE_DIR}/include)
 
 add_compile_options(-std=c++11)
+add_subdirectory(pybind11)
  
 find_package(Eigen3 REQUIRED)
 INCLUDE_DIRECTORIES (${EIGEN3_INCLUDE_DIR})
@@ -31,6 +32,10 @@ link_directories(/usr/local/lib)
 add_library(ur10e_force_torque_sensor SHARED ${ur10e_force_torque_sensor_SOURCE_FILES})
 target_link_libraries(ur10e_force_torque_sensor sdu_math sensor_filter ${yaml_cpp_LIBRARIES})
 
+# Generate python bindings using pybind11
+pybind11_add_module(ur10e_force_torque_sensor_py src/ur10e_force_torque_sensor_py.cpp)
+target_link_libraries(ur10e_force_torque_sensor_py PRIVATE ur10e_force_torque_sensor sdu_math sensor_filter ${yaml_cpp_LIBRARIES})
+target_include_directories(ur10e_force_torque_sensor_py PRIVATE ${EIGEN3_INCLUDE_DIR} ${yaml_cpp_INCLUDE_DIRS})
 
 if (CMAKE_COMPILER_IS_GNUCXX)
 		# Give error in Linux if library is not fully linked (like Windows)
@@ -57,12 +62,61 @@ if (CMAKE_COMPILER_IS_GNUCXX)
 			INCLUDES DESTINATION ${INCLUDE_INSTALL_DIR}
 			)
 
-        install(
+  	install(
 			FILES
 			${LIB_HEADER_FILES}
 			DESTINATION ${INCLUDE_INSTALL_DIR}/ur10e_force_torque_sensor
 			COMPONENT ur10e_force_torque_sensor
 	)
+
+# Install python bindings to site-packages
+execute_process(COMMAND "${PYTHON_EXECUTABLE}" "-c"
+		"from distutils import sysconfig as s;import sys;import struct;
+print('.'.join(str(v) for v in sys.version_info));
+print(sys.prefix);
+print(s.get_python_inc(plat_specific=True));
+print(s.get_python_lib(plat_specific=True));
+print(s.get_config_var('SO'));
+print(hasattr(sys, 'gettotalrefcount')+0);
+print(struct.calcsize('@P'));
+print(s.get_config_var('LDVERSION') or s.get_config_var('VERSION'));
+print(s.get_config_var('LIBDIR') or '');
+print(s.get_config_var('MULTIARCH') or '');
+"
+		RESULT_VARIABLE _PYTHON_SUCCESS
+		OUTPUT_VARIABLE _PYTHON_VALUES
+		ERROR_VARIABLE _PYTHON_ERROR_VALUE)
+
+# Convert the process output into a list
+if(WIN32)
+	string(REGEX REPLACE "\\\\" "/" _PYTHON_VALUES ${_PYTHON_VALUES})
+endif()
+string(REGEX REPLACE ";" "\\\\;" _PYTHON_VALUES ${_PYTHON_VALUES})
+string(REGEX REPLACE "\n" ";" _PYTHON_VALUES ${_PYTHON_VALUES})
+list(GET _PYTHON_VALUES 0 _PYTHON_VERSION_LIST)
+list(GET _PYTHON_VALUES 1 PYTHON_PREFIX)
+list(GET _PYTHON_VALUES 2 PYTHON_INCLUDE_DIR)
+list(GET _PYTHON_VALUES 3 PYTHON_SITE_PACKAGES)
+list(GET _PYTHON_VALUES 4 PYTHON_MODULE_EXTENSION)
+list(GET _PYTHON_VALUES 5 PYTHON_IS_DEBUG)
+list(GET _PYTHON_VALUES 6 PYTHON_SIZEOF_VOID_P)
+list(GET _PYTHON_VALUES 7 PYTHON_LIBRARY_SUFFIX)
+list(GET _PYTHON_VALUES 8 PYTHON_LIBDIR)
+list(GET _PYTHON_VALUES 9 PYTHON_MULTIARCH)
+
+# The built-in FindPython didn't always give the version numbers
+string(REGEX REPLACE "\\." ";" _PYTHON_VERSION_LIST ${_PYTHON_VERSION_LIST})
+list(GET _PYTHON_VERSION_LIST 0 PYTHON_VERSION_MAJOR)
+list(GET _PYTHON_VERSION_LIST 1 PYTHON_VERSION_MINOR)
+list(GET _PYTHON_VERSION_LIST 2 PYTHON_VERSION_PATCH)
+
+# Make sure all directory separators are '/'
+string(REGEX REPLACE "\\\\" "/" PYTHON_PREFIX ${PYTHON_PREFIX})
+string(REGEX REPLACE "\\\\" "/" PYTHON_INCLUDE_DIR ${PYTHON_INCLUDE_DIR})
+string(REGEX REPLACE "\\\\" "/" PYTHON_SITE_PACKAGES ${PYTHON_SITE_PACKAGES})
+
+message("-- Python bindings install path is: " ${PYTHON_SITE_PACKAGES})
+install(TARGETS ur10e_force_torque_sensor_py DESTINATION ${PYTHON_SITE_PACKAGES}/ur10e_force_torque_sensor_py)
 
  
  
