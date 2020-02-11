@@ -85,6 +85,7 @@ SDU-UR10E-Sensor-Common/ur10e_force_torque_sensor includes the following functio
 For example(for LowPassFilter), 
 
     std::shared_ptr<LowPassFilter> lpf;
+    lpf = std::make_shared<LowPassFilter>;
     lpf->control_time = 0.002; //(500Hz)
     lpf->cutoff_frequency = 20; // (20Hz)
     
@@ -106,6 +107,7 @@ For example(for KalmanFilter),
     measurement_variables.resize(6,1);
     
     std::shared_ptr<KalmanFilter> kalman_filter;
+    kalman_filter = std::make_shared<KalmanFilter>;
     kalman_filter->initialize(state_variables, measurement_variables); 
     
     //this example is about only force torque sensor itself, so F,H,Q set identity matrix.
@@ -152,6 +154,7 @@ For example(for KalmanFilter),
 For example (How to use the library)
 
     std::shared_ptr<Ur10eFTsensor> ft_sensor;
+    ft_sensor = std::make_shared<Ur10eFTsensor>;
     
     std::string init_data_path; // it is to load config file.
     init_data_path = "../config/init_data.yaml"; // it must be in your project.
@@ -170,6 +173,7 @@ For example (How to use the library)
 For example (Load gain file YAML)
 
     std::shared_ptr<Ur10eFTsensor> ft_sensor;
+    ft_sensor = std::make_shared<Ur10eFTsensor>;
     
     std::string init_data_path; // it is to load config file.
     init_data_path = "../config/init_data.yaml"; // it must be in your project.
